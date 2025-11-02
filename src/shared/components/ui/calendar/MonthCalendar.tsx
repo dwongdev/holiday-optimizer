@@ -17,7 +17,7 @@ import { OptimizedDay } from '@/types';
 import { cn, DayType, dayTypeToColorScheme } from '@/shared/lib/utils';
 import { COLOR_SCHEMES, WEEKDAYS } from '@/constants';
 import { Lock } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 
 interface MonthCalendarProps {
   month: number;
@@ -190,6 +190,27 @@ const CalendarDay = ({
     </>
   );
 };
+
+interface CalendarGridCellProps {
+  children?: ReactNode;
+  className?: string;
+  ariaHidden?: boolean;
+}
+
+// Ensures each calendar cell stays square using a padding-based aspect ratio fallback.
+const CalendarGridCell = ({ children, className, ariaHidden }: CalendarGridCellProps) => (
+  <div className="relative w-full">
+    <div className="pb-[100%] pointer-events-none" />
+    <div className="absolute inset-0">
+      <div
+        className={cn('relative h-full w-full p-1 text-xs', className)}
+        aria-hidden={ariaHidden}
+      >
+        {children}
+      </div>
+    </div>
+  </div>
+);
 
 // Determine styling based on day state
 const getDayStyles = (isCurrentDay: boolean, isPastDay: boolean, dayType: DayType) => {
@@ -461,54 +482,51 @@ export function MonthCalendar({ month, year, days }: MonthCalendarProps) {
           <h4 className="text-base font-medium text-gray-900 leading-none">
             {format(firstDay, 'MMMM yyyy')}
           </h4>
-        <div className="mt-1 text-xs text-gray-600 min-h-[1.25rem] flex items-center gap-2">
-          {holidays.length > 0 && (
-            <>Holidays: {holidays.map(h => h.publicHolidayName).join(', ')}</>
-          )}
+          <div className="mt-1 text-xs text-gray-600 min-h-[1.25rem] flex items-center gap-2">
+            {holidays.length > 0 && (
+              <>Holidays: {holidays.map(h => h.publicHolidayName).join(', ')}</>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Calendar Grid */}
-      <div className="p-2">
-        <div className="grid grid-cols-7 gap-0.5">
-          {/* Weekday Headers */}
-          {WEEKDAYS.map(day => (
-            <div key={day} className="text-center text-xs font-medium text-gray-600 py-1">
-              {day}
-            </div>
-          ))}
-
-          {/* Calendar Days */}
-          {calendarDays.map((day, index) => {
-            if (!day) {
-              return (
-                <div
-                  key={index}
-                  className={cn('aspect-square p-1 text-xs relative bg-gray-50')}
-                />
-              );
-            }
-
-            const info = getDayInfo(day);
-            const isMobileSelected = Boolean(
-              selectedMobileDay && selectedMobileDay.date.getTime() === info.date.getTime()
-            );
-
-            return (
-              <div key={index} className="aspect-square p-1 text-xs relative">
-                <CalendarDay
-                  day={day}
-                  dayInfo={info}
-                  hasPublicHoliday={dayTypeFlags.hasPublicHoliday}
-                  isTouchMode={isTouchMode}
-                  isMobileSelected={isMobileSelected}
-                  onMobileSelect={handleMobileSelect}
-                />
+        {/* Calendar Grid */}
+        <div className="p-2">
+          <div className="grid grid-cols-7 gap-0.5">
+            {/* Weekday Headers */}
+            {WEEKDAYS.map(day => (
+              <div key={day} className="text-center text-xs font-medium text-gray-600 py-1">
+                {day}
               </div>
-            );
-          })}
+            ))}
+
+            {/* Calendar Days */}
+            {calendarDays.map((day, index) => {
+              if (!day) {
+                return (
+                  <CalendarGridCell key={index} className="bg-gray-50 rounded-md" ariaHidden />
+                );
+              }
+
+              const info = getDayInfo(day);
+              const isMobileSelected = Boolean(
+                selectedMobileDay && selectedMobileDay.date.getTime() === info.date.getTime()
+              );
+
+              return (
+                <CalendarGridCell key={index}>
+                  <CalendarDay
+                    day={day}
+                    dayInfo={info}
+                    hasPublicHoliday={dayTypeFlags.hasPublicHoliday}
+                    isTouchMode={isTouchMode}
+                    isMobileSelected={isMobileSelected}
+                    onMobileSelect={handleMobileSelect}
+                  />
+                </CalendarGridCell>
+              );
+            })}
+          </div>
         </div>
-      </div>
       </div>
 
       {isTouchMode && selectedMobileDay && (

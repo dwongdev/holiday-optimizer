@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Input } from '@/shared/components/ui/input';
 import { cn } from '@/shared/lib/utils';
 import { StepHeader } from './components/StepHeader';
@@ -7,8 +8,17 @@ import { StepTitleWithInfo } from './components/StepTitleWithInfo';
 
 export function DaysInputStep() {
   const { days, daysError, setDays } = useOptimizerForm();
-  const shouldAutofocus =
-    typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (window.matchMedia('(pointer: fine)').matches) {
+      inputRef.current?.focus();
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setDays(e.target.value);
 
@@ -54,7 +64,7 @@ export function DaysInputStep() {
           <span className="sr-only">(numeric input field)</span>
         </label>
         <Input
-          autoFocus={shouldAutofocus}
+          ref={inputRef}
           id="days"
           name="days"
           type="number"

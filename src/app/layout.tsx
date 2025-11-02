@@ -16,6 +16,8 @@ import { Providers } from './Providers';
 import { ReleaseBanner } from '@/shared/components/layout/ReleaseBanner';
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
 
+const BROWSER_THEME_COLOR = '#0f172a';
+
 export const metadata: Metadata = {
   title: 'Holiday Optimizer',
   description: 'Optimize your Paid Time Off days to maximize your time off throughout the year.',
@@ -63,6 +65,7 @@ export const viewport: Viewport = {
   minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
+  themeColor: BROWSER_THEME_COLOR,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
